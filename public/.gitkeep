@@ -1,0 +1,2 @@
+# O Dockerfile copia /app/public para a imagem final. A pasta precisa existir
+# no repositorio mesmo enquanto estiver vazia, senao o build quebra no COPY.
