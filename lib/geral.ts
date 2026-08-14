@@ -108,7 +108,11 @@ export const LISTAS: ListaParametro[] = [
 ]
 
 export const GRUPOS_GERAL: GrupoGeral[] = [
-  { titulo: 'Dashboards', icon: LayoutDashboard, modulos: [] },
+  {
+    titulo: 'Dashboards',
+    icon: LayoutDashboard,
+    modulos: [{ nome: 'Visão Geral', href: '/geral/dashboards' }],
+  },
   {
     titulo: 'Formulários',
     icon: ClipboardList,
