@@ -43,10 +43,16 @@ create table if not exists public.obreiros (
   id         uuid primary key default gen_random_uuid(),
   nome       text not null,
   cargo_id   uuid references public.cargos(id) on delete set null,
+  corpo_id   uuid references public.corpos(id) on delete set null,
   matricula  integer,
   ano        integer,
   created_at timestamptz not null default now()
 );
+
+-- "create table if not exists" nao altera tabela ja criada: para quem rodou
+-- este arquivo antes de corpo_id existir, a coluna entra por aqui.
+alter table public.obreiros
+  add column if not exists corpo_id uuid references public.corpos(id) on delete set null;
 
 create table if not exists public.notes (
   id         uuid primary key default gen_random_uuid(),

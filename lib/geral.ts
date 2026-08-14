@@ -45,6 +45,7 @@ export const FORMULARIOS: Formulario[] = [
     campos: [
       { coluna: 'nome', nome: 'Nome', tipo: 'texto', obrigatorio: true },
       { coluna: 'cargo_id', nome: 'Cargo', tipo: 'lista', refTabela: 'cargos' },
+      { coluna: 'corpo_id', nome: 'Corpo', tipo: 'lista', refTabela: 'corpos' },
       { coluna: 'matricula', nome: 'Matrícula', tipo: 'numero' },
       { coluna: 'ano', nome: 'Ano', tipo: 'ano' },
     ],
