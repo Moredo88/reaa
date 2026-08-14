@@ -7,7 +7,7 @@ import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
 import Textarea from '@/components/ui/Textarea'
 import Select from '@/components/ui/Select'
-import EmptyState from '@/components/ui/EmptyState'
+import DataTable from './DataTable'
 import { formatDate } from '@/lib/utils'
 import type { Formulario } from '@/lib/geral'
 import type { OpcaoRef } from '@/lib/geral/repositorio'
@@ -199,46 +199,35 @@ export default function FormularioClient({ formulario, registros, opcoes, podeEd
       )}
 
       <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white">
-        {registros.length === 0 ? (
-          <EmptyState title="Nenhum registro cadastrado" />
-        ) : (
-          <table className="w-full text-sm">
-            <thead className="border-b border-slate-200 bg-slate-50 text-left text-xs uppercase tracking-wider text-slate-500">
-              <tr>
-                {formulario.campos.map((campo) => (
-                  <th key={campo.coluna} className="px-4 py-3 font-semibold">{campo.nome}</th>
-                ))}
-                {podeEditar && <th className="px-4 py-3" />}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {registros.map((registro) => (
-                <tr key={String(registro.id)} className="hover:bg-slate-50">
-                  {formulario.campos.map((campo) => (
-                    <td key={campo.coluna} className="px-4 py-3 text-slate-900">
-                      {valorExibicao(formulario, registro, campo.coluna)}
-                    </td>
-                  ))}
-                  {podeEditar && (
-                    <td className="px-4 py-3 text-right whitespace-nowrap">
-                      <Button variant="ghost" size="sm" onClick={() => abrirEdicao(registro)}>
-                        Editar
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => excluir(String(registro.id))}
-                        aria-label="Excluir registro"
-                      >
-                        <Trash2 className="h-4 w-4 text-red-600" />
-                      </Button>
-                    </td>
-                  )}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
+        <DataTable
+          colunas={formulario.campos.map((campo) => ({
+            chave: campo.coluna,
+            rotulo: campo.nome,
+            valor: (registro: Record<string, unknown>) => valorExibicao(formulario, registro, campo.coluna),
+          }))}
+          registros={registros}
+          chaveLinha={(registro) => String(registro.id)}
+          vazio="Nenhum registro cadastrado"
+          acoes={
+            podeEditar
+              ? (registro) => (
+                  <>
+                    <Button variant="ghost" size="sm" onClick={() => abrirEdicao(registro)}>
+                      Editar
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => excluir(String(registro.id))}
+                      aria-label="Excluir registro"
+                    >
+                      <Trash2 className="h-4 w-4 text-red-600" />
+                    </Button>
+                  </>
+                )
+              : undefined
+          }
+        />
       </div>
     </div>
   )

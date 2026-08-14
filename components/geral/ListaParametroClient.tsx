@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Plus, Trash2, X } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
-import EmptyState from '@/components/ui/EmptyState'
+import DataTable from './DataTable'
 import type { ListaParametro } from '@/lib/geral'
 import type { OpcaoRef } from '@/lib/geral/repositorio'
 
@@ -117,39 +117,30 @@ export default function ListaParametroClient({ lista, registros, podeEditar }: P
       )}
 
       <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white">
-        {registros.length === 0 ? (
-          <EmptyState title="Nenhum item cadastrado" />
-        ) : (
-          <table className="w-full text-sm">
-            <thead className="border-b border-slate-200 bg-slate-50 text-left text-xs uppercase tracking-wider text-slate-500">
-              <tr>
-                <th className="px-4 py-3 font-semibold">Nome</th>
-                {podeEditar && <th className="px-4 py-3" />}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {registros.map((r) => (
-                <tr key={r.id} className="hover:bg-slate-50">
-                  <td className="px-4 py-3 text-slate-900">{r.nome}</td>
-                  {podeEditar && (
-                    <td className="px-4 py-3 text-right whitespace-nowrap">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => { setErro(''); setForm({ id: r.id, nome: r.nome }) }}
-                      >
-                        Editar
-                      </Button>
-                      <Button variant="ghost" size="sm" onClick={() => excluir(r)} aria-label={`Excluir ${r.nome}`}>
-                        <Trash2 className="h-4 w-4 text-red-600" />
-                      </Button>
-                    </td>
-                  )}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
+        <DataTable
+          colunas={[{ chave: 'nome', rotulo: 'Nome', valor: (r: OpcaoRef) => r.nome }]}
+          registros={registros}
+          chaveLinha={(r) => r.id}
+          vazio="Nenhum item cadastrado"
+          acoes={
+            podeEditar
+              ? (r) => (
+                  <>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => { setErro(''); setForm({ id: r.id, nome: r.nome }) }}
+                    >
+                      Editar
+                    </Button>
+                    <Button variant="ghost" size="sm" onClick={() => excluir(r)} aria-label={`Excluir ${r.nome}`}>
+                      <Trash2 className="h-4 w-4 text-red-600" />
+                    </Button>
+                  </>
+                )
+              : undefined
+          }
+        />
       </div>
     </div>
   )
