@@ -1,12 +1,9 @@
-import { notFound } from 'next/navigation'
-import { SlidersHorizontal } from 'lucide-react'
+import { notFound, redirect } from 'next/navigation'
+import { createClient } from '@/lib/supabase/server'
+import { getPerfil } from '@/lib/auth/permissions'
 import { LISTAS } from '@/lib/geral'
-import EmptyState from '@/components/ui/EmptyState'
-import Badge from '@/components/ui/Badge'
-
-export function generateStaticParams() {
-  return LISTAS.map((l) => ({ slug: l.slug }))
-}
+import { listarParametro } from '@/lib/geral/repositorio'
+import ListaParametroClient from '@/components/geral/ListaParametroClient'
 
 export default async function ParametroPage({
   params,
@@ -17,28 +14,18 @@ export default async function ParametroPage({
   const lista = LISTAS.find((l) => l.slug === slug)
   if (!lista) notFound()
 
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/login')
+
+  const perfil = await getPerfil(supabase, user.id)
+  const registros = await listarParametro(supabase, lista.tabela)
+
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900">{lista.nome}</h1>
-        <p className="mt-1 text-sm text-slate-500">Lista de parâmetros: {lista.nome}</p>
-      </div>
-
-      <div className="rounded-xl border border-slate-200 bg-white">
-        <EmptyState
-          title="Gestão da lista em construção"
-          description="A tela para editar estes valores ainda não foi publicada. Os valores cadastrados na planilha original estão listados abaixo."
-          icon={<SlidersHorizontal className="h-10 w-10" />}
-        />
-
-        <div className="flex flex-wrap gap-2 border-t border-slate-100 px-6 py-5">
-          {lista.valores.map((valor) => (
-            <Badge key={valor} className="bg-slate-100 text-slate-700">
-              {valor}
-            </Badge>
-          ))}
-        </div>
-      </div>
-    </div>
+    <ListaParametroClient
+      lista={lista}
+      registros={registros}
+      podeEditar={perfil.papel === 'admin'}
+    />
   )
 }

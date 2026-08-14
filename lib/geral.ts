@@ -2,21 +2,30 @@ import type { ElementType } from 'react'
 import { LayoutDashboard, ClipboardList, SlidersHorizontal } from 'lucide-react'
 import type { Modulo } from './secoes'
 
+export type TipoCampo = 'texto' | 'texto_longo' | 'numero' | 'ano' | 'data' | 'lista' | 'formulario'
+
 export interface CampoFormulario {
+  /** Nome da coluna na tabela do banco. */
+  coluna: string
+  /** Rotulo mostrado no formulario e na tabela. */
   nome: string
-  tipo: string
+  tipo: TipoCampo
+  /** Para tipo 'lista' ou 'formulario': tabela de onde vem as opcoes do select. */
+  refTabela?: string
+  obrigatorio?: boolean
 }
 
 export interface Formulario {
   slug: string
+  tabela: string
   nome: string
   campos: CampoFormulario[]
 }
 
 export interface ListaParametro {
   slug: string
+  tabela: string
   nome: string
-  valores: string[]
 }
 
 export interface GrupoGeral {
@@ -27,109 +36,74 @@ export interface GrupoGeral {
 
 // Espelha a planilha "base reaa sistema.xlsx": colunas FORMULARIO viram
 // telas de cadastro, colunas LISTA viram parametros. Fonte unica para o
-// menu lateral e para as paginas em app/(app)/geral.
+// menu lateral, as paginas em app/(app)/geral e as rotas /api/geral.
 export const FORMULARIOS: Formulario[] = [
   {
     slug: 'obreiros',
+    tabela: 'obreiros',
     nome: 'Obreiros',
     campos: [
-      { nome: 'Nome', tipo: 'Texto' },
-      { nome: 'Cargo', tipo: 'Lista "Cargos"' },
-      { nome: 'Matrícula', tipo: 'Número' },
-      { nome: 'Ano', tipo: 'Data (ano)' },
+      { coluna: 'nome', nome: 'Nome', tipo: 'texto', obrigatorio: true },
+      { coluna: 'cargo_id', nome: 'Cargo', tipo: 'lista', refTabela: 'cargos' },
+      { coluna: 'matricula', nome: 'Matrícula', tipo: 'numero' },
+      { coluna: 'ano', nome: 'Ano', tipo: 'ano' },
     ],
   },
   {
     slug: 'notes',
+    tabela: 'notes',
     nome: 'Notes',
     campos: [
-      { nome: 'Título', tipo: 'Texto' },
-      { nome: 'Texto', tipo: 'Texto' },
+      { coluna: 'titulo', nome: 'Título', tipo: 'texto', obrigatorio: true },
+      { coluna: 'texto', nome: 'Texto', tipo: 'texto_longo' },
     ],
   },
   {
     slug: 'eventos',
+    tabela: 'eventos',
     nome: 'Eventos',
     campos: [
-      { nome: 'Agenda', tipo: 'Lista "Agenda"' },
-      { nome: 'Data', tipo: 'Data' },
-      { nome: 'Obreiro', tipo: 'Formulário "Obreiros"' },
-      { nome: 'Grau', tipo: 'Lista "Graus"' },
-      { nome: 'Impressões', tipo: 'Texto' },
+      { coluna: 'agenda_id', nome: 'Agenda', tipo: 'lista', refTabela: 'agendas' },
+      { coluna: 'data', nome: 'Data', tipo: 'data' },
+      { coluna: 'obreiro_id', nome: 'Obreiro', tipo: 'formulario', refTabela: 'obreiros' },
+      { coluna: 'grau_id', nome: 'Grau', tipo: 'lista', refTabela: 'graus' },
+      { coluna: 'impressoes', nome: 'Impressões', tipo: 'texto_longo' },
     ],
   },
   {
     slug: 'cobridor',
+    tabela: 'cobridores',
     nome: 'Cobridor',
     campos: [
-      { nome: 'Sinal', tipo: 'Texto' },
-      { nome: 'Alegorias', tipo: 'Texto' },
-      { nome: 'Símbolos', tipo: 'Texto' },
-      { nome: 'Idade', tipo: 'Número' },
-      { nome: 'Passos', tipo: 'Texto' },
-      { nome: 'Toques', tipo: 'Texto' },
-      { nome: 'Outro', tipo: 'Texto' },
+      { coluna: 'sinal', nome: 'Sinal', tipo: 'texto' },
+      { coluna: 'alegorias', nome: 'Alegorias', tipo: 'texto' },
+      { coluna: 'simbolos', nome: 'Símbolos', tipo: 'texto' },
+      { coluna: 'idade', nome: 'Idade', tipo: 'numero' },
+      { coluna: 'passos', nome: 'Passos', tipo: 'texto' },
+      { coluna: 'toques', nome: 'Toques', tipo: 'texto' },
+      { coluna: 'outro', nome: 'Outro', tipo: 'texto' },
     ],
   },
   {
     slug: 'resumo',
+    tabela: 'resumos',
     nome: 'Resumo',
     campos: [
-      { nome: 'Alegorias', tipo: 'Texto' },
-      { nome: 'Símbolos', tipo: 'Texto' },
-      { nome: 'Juramento', tipo: 'Texto' },
-      { nome: 'Moral', tipo: 'Texto' },
-      { nome: 'Personagens', tipo: 'Texto' },
-      { nome: 'Contexto Histórico', tipo: 'Texto' },
+      { coluna: 'alegorias', nome: 'Alegorias', tipo: 'texto' },
+      { coluna: 'simbolos', nome: 'Símbolos', tipo: 'texto' },
+      { coluna: 'juramento', nome: 'Juramento', tipo: 'texto' },
+      { coluna: 'moral', nome: 'Moral', tipo: 'texto' },
+      { coluna: 'personagens', nome: 'Personagens', tipo: 'texto' },
+      { coluna: 'contexto_historico', nome: 'Contexto Histórico', tipo: 'texto_longo' },
     ],
   },
 ]
 
 export const LISTAS: ListaParametro[] = [
-  {
-    slug: 'corpo',
-    nome: 'Corpo',
-    valores: [
-      'TAR 100',
-      'ELP Cavaleiros Chave de Marfim',
-      'ELP José Carvalho',
-      'SCRC Leopoldo Jorge Cardon',
-    ],
-  },
-  {
-    slug: 'graus',
-    nome: 'Graus',
-    valores: [
-      'Perfeição',
-      'Capítulo',
-      'Kadosh',
-      'Consistório',
-      'Inspetoria',
-      'Del.Lit.',
-      'Superiores',
-      'Simbólica',
-      ...Array.from({ length: 33 }, (_, i) => String(i + 1)),
-    ],
-  },
-  {
-    slug: 'agenda',
-    nome: 'Agenda',
-    valores: ['Iniciação', 'Apres. Trabalho', 'Reflexão', 'Reunião', 'Seminário', 'Posse'],
-  },
-  {
-    slug: 'cargos',
-    nome: 'Cargos',
-    valores: [
-      'Presidente',
-      '1. Vig.',
-      '2. Vig.',
-      'Secretario',
-      'Orador',
-      'Tesoureiro',
-      'Comissão de Grau',
-      'Obreiro',
-    ],
-  },
+  { slug: 'corpo', tabela: 'corpos', nome: 'Corpo' },
+  { slug: 'graus', tabela: 'graus', nome: 'Graus' },
+  { slug: 'agenda', tabela: 'agendas', nome: 'Agenda' },
+  { slug: 'cargos', tabela: 'cargos', nome: 'Cargos' },
 ]
 
 export const GRUPOS_GERAL: GrupoGeral[] = [
