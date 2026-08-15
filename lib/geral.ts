@@ -81,7 +81,9 @@ export const FORMULARIOS: Formulario[] = [
       { coluna: 'sinal', nome: 'Sinal', tipo: 'texto' },
       // Rotulo renomeado; a coluna continua `alegorias` para nao migrar dados.
       { coluna: 'alegorias', nome: 'Palavras', tipo: 'texto' },
-      { coluna: 'simbolos', nome: 'Símbolos', tipo: 'texto' },
+      // Entrou no lugar de `simbolos`, que saiu do formulario. A coluna
+      // cobridores.simbolos continua no banco, com os dados que ja tinha.
+      { coluna: 'grau_id', nome: 'Grau', tipo: 'lista', refTabela: 'graus' },
       { coluna: 'idade', nome: 'Idade', tipo: 'numero' },
       // Idem: a coluna segue `passos`. Nao confundir com resumos.livro_da_lei,
       // que e outra coluna, em outro formulario, com o mesmo rotulo.

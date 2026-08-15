@@ -84,7 +84,10 @@ create table if not exists public.cobridores (
   id         uuid primary key default gen_random_uuid(),
   sinal      text,
   alegorias  text,
+  -- `simbolos` saiu do formulario, mas a coluna fica: apagar levaria junto o
+  -- que ja foi cadastrado. Ver o campo Grau que entrou no lugar dela.
   simbolos   text,
+  grau_id    uuid references public.graus(id) on delete set null,
   idade      integer,
   passos     text,
   marcha     text,
@@ -95,6 +98,8 @@ create table if not exists public.cobridores (
 
 alter table public.cobridores
   add column if not exists marcha text;
+alter table public.cobridores
+  add column if not exists grau_id uuid references public.graus(id) on delete set null;
 
 create table if not exists public.resumos (
   id                 uuid primary key default gen_random_uuid(),
