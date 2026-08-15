@@ -83,6 +83,7 @@ export const FORMULARIOS: Formulario[] = [
       { coluna: 'simbolos', nome: 'Símbolos', tipo: 'texto' },
       { coluna: 'idade', nome: 'Idade', tipo: 'numero' },
       { coluna: 'passos', nome: 'Passos', tipo: 'texto' },
+      { coluna: 'marcha', nome: 'Marcha', tipo: 'texto' },
       { coluna: 'toques', nome: 'Toques', tipo: 'texto' },
       { coluna: 'outro', nome: 'Outro', tipo: 'texto' },
     ],

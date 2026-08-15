@@ -87,10 +87,14 @@ create table if not exists public.cobridores (
   simbolos   text,
   idade      integer,
   passos     text,
+  marcha     text,
   toques     text,
   outro      text,
   created_at timestamptz not null default now()
 );
+
+alter table public.cobridores
+  add column if not exists marcha text;
 
 create table if not exists public.resumos (
   id                 uuid primary key default gen_random_uuid(),
