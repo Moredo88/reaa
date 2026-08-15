@@ -100,14 +100,17 @@ create table if not exists public.resumos (
   juramento          text,
   moral              text,
   personagens        text,
+  livro_da_lei       text,
   contexto_historico text,
   created_at         timestamptz not null default now()
 );
 
 -- "create table if not exists" nao altera tabela ja criada: para quem rodou
--- este arquivo antes de grau_id existir, a coluna entra por aqui.
+-- este arquivo antes destas colunas existirem, elas entram por aqui.
 alter table public.resumos
   add column if not exists grau_id uuid references public.graus(id) on delete set null;
+alter table public.resumos
+  add column if not exists livro_da_lei text;
 
 -- ------------------------------------------------------------
 -- RLS: qualquer pessoa logada le; so admin cria, edita ou exclui.

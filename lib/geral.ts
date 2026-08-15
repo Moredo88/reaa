@@ -98,6 +98,7 @@ export const FORMULARIOS: Formulario[] = [
       { coluna: 'juramento', nome: 'Juramento', tipo: 'texto' },
       { coluna: 'moral', nome: 'Moral', tipo: 'texto' },
       { coluna: 'personagens', nome: 'Personagens', tipo: 'texto' },
+      { coluna: 'livro_da_lei', nome: 'Livro da Lei', tipo: 'texto' },
       { coluna: 'contexto_historico', nome: 'Contexto Histórico', tipo: 'texto_longo' },
     ],
   },
