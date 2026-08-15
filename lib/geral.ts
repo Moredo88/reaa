@@ -112,7 +112,10 @@ export const GRUPOS_GERAL: GrupoGeral[] = [
   {
     titulo: 'Dashboards',
     icon: LayoutDashboard,
-    modulos: [{ nome: 'Visão Geral', href: '/geral/dashboards' }],
+    modulos: [
+      { nome: 'Visão Geral', href: '/geral/dashboards' },
+      { nome: 'Ficha do Grau', href: '/geral/dashboards/ficha-grau' },
+    ],
   },
   {
     titulo: 'Formulários',
