@@ -1,9 +1,12 @@
 'use client'
 
-import { useState } from 'react'
-import { Layers, MousePointerClick, FileQuestion } from 'lucide-react'
+import { useState, type ElementType } from 'react'
+import {
+  Sparkles, Shapes, Scroll, Scale, Users, BookOpen, Landmark,
+  FileText, Layers, MousePointerClick, FileQuestion,
+} from 'lucide-react'
 import Select from '@/components/ui/Select'
-import type { Formulario } from '@/lib/geral'
+import type { CampoFormulario, Formulario } from '@/lib/geral'
 import type { OpcaoRef } from '@/lib/geral/repositorio'
 
 interface Props {
@@ -13,8 +16,70 @@ interface Props {
 }
 
 // Grau ja aparece no cabecalho da ficha; o resto dos campos do Resumo entra
-// na visao executiva, na mesma ordem definida em lib/geral.ts.
+// na visao executiva, agrupado por tema.
 const CAMPOS_OCULTOS = ['grau_id']
+
+// Cor por grupo, nao por campo: tres matizes separadas (blue-600 / orange-600 /
+// emerald-600) passam o gate de daltonismo em todos os pares -- sete matizes,
+// uma por campo, nao passam. Classes literais porque o Tailwind le o codigo
+// fonte na compilacao, igual ao `cor` de lib/secoes.ts.
+interface GrupoFicha {
+  nome: string
+  colunas: string[]
+  cor: { ponto: string; tile: string; cartao: string }
+}
+
+const GRUPOS: GrupoFicha[] = [
+  {
+    nome: 'Simbolismo',
+    colunas: ['alegorias', 'simbolos'],
+    cor: {
+      ponto: 'bg-blue-600',
+      tile: 'bg-blue-600 text-white',
+      cartao: 'border-blue-100 bg-blue-50/40',
+    },
+  },
+  {
+    nome: 'Doutrina',
+    colunas: ['juramento', 'moral', 'livro_da_lei'],
+    cor: {
+      ponto: 'bg-orange-600',
+      tile: 'bg-orange-600 text-white',
+      cartao: 'border-orange-100 bg-orange-50/40',
+    },
+  },
+  {
+    nome: 'Narrativa',
+    colunas: ['personagens', 'contexto_historico'],
+    cor: {
+      ponto: 'bg-emerald-600',
+      tile: 'bg-emerald-600 text-white',
+      cartao: 'border-emerald-100 bg-emerald-50/40',
+    },
+  },
+]
+
+// Campo novo em lib/geral.ts que ninguem classificou cai neste grupo, com
+// icone generico -- aparece na ficha em vez de sumir.
+const GRUPO_PADRAO: GrupoFicha = {
+  nome: 'Outros',
+  colunas: [],
+  cor: {
+    ponto: 'bg-slate-400',
+    tile: 'bg-slate-600 text-white',
+    cartao: 'border-slate-200 bg-slate-50/60',
+  },
+}
+
+const ICONES: Record<string, ElementType> = {
+  alegorias: Sparkles,
+  simbolos: Shapes,
+  juramento: Scroll,
+  moral: Scale,
+  personagens: Users,
+  livro_da_lei: BookOpen,
+  contexto_historico: Landmark,
+}
 
 function textoDe(valor: unknown): string | null {
   if (valor === null || valor === undefined) return null
@@ -28,7 +93,20 @@ export default function FichaGrauClient({ formulario, graus, resumos }: Props) {
   const grauNome = graus.find((g) => g.id === grauId)?.nome
   const resumo = grauId ? resumos.find((r) => String(r.grau_id ?? '') === grauId) : undefined
   const campos = formulario.campos.filter((c) => !CAMPOS_OCULTOS.includes(c.coluna))
+
   const preenchidos = resumo ? campos.filter((c) => textoDe(resumo[c.coluna])).length : 0
+  const porcento = campos.length === 0 ? 0 : Math.round((preenchidos / campos.length) * 100)
+
+  const classificados = new Set(GRUPOS.flatMap((g) => g.colunas))
+  const secoes = [
+    ...GRUPOS.map((grupo) => ({
+      grupo,
+      campos: grupo.colunas
+        .map((coluna) => campos.find((c) => c.coluna === coluna))
+        .filter((c): c is CampoFormulario => Boolean(c)),
+    })),
+    { grupo: GRUPO_PADRAO, campos: campos.filter((c) => !classificados.has(c.coluna)) },
+  ].filter((s) => s.campos.length > 0)
 
   return (
     <div className="space-y-6">
@@ -61,26 +139,39 @@ export default function FichaGrauClient({ formulario, graus, resumos }: Props) {
       )}
 
       {grauId && (
-        <section className="max-w-3xl overflow-hidden rounded-xl border border-slate-200 bg-white">
-          <header className="flex items-center gap-3 border-b border-slate-200 bg-blue-50/50 px-6 py-4">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-100 text-blue-700">
-              <Layers className="h-5 w-5" />
+        <div className="max-w-4xl space-y-6">
+          <header className="flex flex-col gap-4 rounded-xl border border-slate-200 bg-white p-5 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-3">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white">
+                <Layers className="h-6 w-6" />
+              </div>
+              <div className="min-w-0">
+                <h2 className="truncate text-xl font-bold tracking-tight text-slate-900">
+                  {grauNome}
+                </h2>
+                <p className="text-xs text-slate-500">Visão executiva do Resumo</p>
+              </div>
             </div>
-            <div className="min-w-0 flex-1">
-              <h2 className="truncate text-base font-bold tracking-tight text-slate-900">
-                {grauNome}
-              </h2>
-              <p className="text-xs text-slate-500">Visão executiva do Resumo</p>
-            </div>
+
+            {/* Medidor: preenchimento sobre trilha do mesmo azul, um passo mais
+                claro -- o estado se le na barra inteira, nao so na parte cheia. */}
             {resumo && (
-              <span className="shrink-0 rounded-full bg-white px-3 py-1 text-xs font-medium text-slate-600 ring-1 ring-slate-200">
-                {preenchidos} de {campos.length} campos
-              </span>
+              <div className="w-full sm:w-52">
+                <div className="flex items-baseline justify-between gap-2">
+                  <span className="text-xs text-slate-500">Preenchimento</span>
+                  <span className="text-xs font-medium text-slate-700">
+                    {preenchidos} de {campos.length}
+                  </span>
+                </div>
+                <div className="mt-1.5 h-2 w-full overflow-hidden rounded-full bg-blue-100">
+                  <div className="h-full rounded-full bg-blue-600" style={{ width: `${porcento}%` }} />
+                </div>
+              </div>
             )}
           </header>
 
           {!resumo ? (
-            <div className="flex flex-col items-center gap-2 px-6 py-14 text-center">
+            <div className="flex flex-col items-center gap-2 rounded-xl border border-slate-200 bg-white px-6 py-14 text-center">
               <FileQuestion className="h-5 w-5 text-slate-400" />
               <p className="text-sm text-slate-500">Nenhum resumo cadastrado para este grau.</p>
               <p className="text-xs text-slate-400">
@@ -88,38 +179,59 @@ export default function FichaGrauClient({ formulario, graus, resumos }: Props) {
               </p>
             </div>
           ) : (
-            <dl className="divide-y divide-slate-100 px-6">
-              {campos.map((campo) => {
-                const texto = textoDe(resumo[campo.coluna])
-                const longo = campo.tipo === 'texto_longo'
+            secoes.map(({ grupo, campos: camposGrupo }) => {
+              const cheios = camposGrupo.filter((c) => textoDe(resumo[c.coluna])).length
 
-                return (
-                  <div
-                    key={campo.coluna}
-                    className={
-                      longo
-                        ? 'py-4'
-                        : 'grid gap-1 py-3.5 sm:grid-cols-[11rem_1fr] sm:items-baseline sm:gap-4'
-                    }
-                  >
-                    <dt className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-                      {campo.nome}
-                    </dt>
-                    <dd
-                      className={
-                        longo
-                          ? 'mt-2 whitespace-pre-wrap rounded-lg bg-slate-50 px-4 py-3 text-sm leading-relaxed text-slate-700'
-                          : 'text-sm text-slate-900'
-                      }
-                    >
-                      {texto ?? <span className="text-slate-300">Não informado</span>}
-                    </dd>
+              return (
+                <section key={grupo.nome}>
+                  <div className="flex items-center gap-2.5">
+                    <span className={`h-2 w-2 shrink-0 rounded-full ${grupo.cor.ponto}`} />
+                    <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+                      {grupo.nome}
+                    </h3>
+                    <span className="h-px flex-1 bg-slate-200" />
+                    <span className="shrink-0 text-xs tabular-nums text-slate-400">
+                      {cheios}/{camposGrupo.length}
+                    </span>
                   </div>
-                )
-              })}
-            </dl>
+
+                  <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                    {camposGrupo.map((campo) => {
+                      const Icone = ICONES[campo.coluna] ?? FileText
+                      const texto = textoDe(resumo[campo.coluna])
+                      const longo = campo.tipo === 'texto_longo'
+
+                      return (
+                        <article
+                          key={campo.coluna}
+                          className={`rounded-xl border p-4 ${grupo.cor.cartao} ${longo ? 'sm:col-span-2' : ''}`}
+                        >
+                          <div className="flex items-center gap-2.5">
+                            <span
+                              className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${grupo.cor.tile}`}
+                            >
+                              <Icone className="h-4 w-4" />
+                            </span>
+                            <h4 className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                              {campo.nome}
+                            </h4>
+                          </div>
+                          <p
+                            className={`mt-3 whitespace-pre-wrap text-sm leading-relaxed ${
+                              texto ? 'text-slate-900' : 'text-slate-400'
+                            }`}
+                          >
+                            {texto ?? 'Não informado'}
+                          </p>
+                        </article>
+                      )
+                    })}
+                  </div>
+                </section>
+              )
+            })
           )}
-        </section>
+        </div>
       )}
     </div>
   )
