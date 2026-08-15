@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useState, type ElementType } from 'react'
+import { useEffect, useRef, useState, type ElementType } from 'react'
 import { Bold, Italic, Underline } from 'lucide-react'
 import { clsx } from 'clsx'
 import { CORES_TEXTO } from '@/lib/geral/cores'
@@ -33,11 +33,19 @@ function comandar(comando: string, valor?: string) {
 export default function EditorTexto({ id, label, valorInicial, onChange, multilinha }: Props) {
   const caixa = useRef<HTMLDivElement>(null)
 
-  // O conteudo NAO e controlado por state do React: reescrever o innerHTML a
-  // cada tecla joga o cursor para o fim do texto. `useState` sem setter congela
-  // o valor da montagem -- por isso FormularioClient da `key` ao <form>, para o
-  // editor remontar quando troca o registro em edicao.
+  // `useState` sem setter congela o valor da montagem -- por isso
+  // FormularioClient da `key` ao <form>, para o editor remontar quando troca o
+  // registro em edicao.
   const [inicial] = useState(valorInicial)
+
+  // O HTML inicial entra por aqui, imperativamente, e NAO por
+  // dangerouslySetInnerHTML: aquela prop recebe um objeto novo a cada render,
+  // o React a trata como alterada por identidade e reaplica setInnerHTML,
+  // apagando o que o usuario acabou de digitar ou formatar. Sem children e sem
+  // dangerouslySetInnerHTML, o React nao gerencia o conteudo da caixa.
+  useEffect(() => {
+    if (caixa.current) caixa.current.innerHTML = inicial
+  }, [inicial])
 
   return (
     <div className="flex flex-col gap-1">
@@ -97,7 +105,6 @@ export default function EditorTexto({ id, label, valorInicial, onChange, multili
           aria-labelledby={`${id}-rotulo`}
           aria-multiline={multilinha ? 'true' : 'false'}
           onInput={(e) => onChange(e.currentTarget.innerHTML)}
-          dangerouslySetInnerHTML={{ __html: inicial }}
           className={clsx(
             'px-3 py-2 text-sm text-slate-900 focus:outline-none',
             multilinha ? 'min-h-24' : 'min-h-9'
