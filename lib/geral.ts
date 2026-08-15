@@ -79,10 +79,13 @@ export const FORMULARIOS: Formulario[] = [
     nome: 'Cobridor',
     campos: [
       { coluna: 'sinal', nome: 'Sinal', tipo: 'texto' },
-      { coluna: 'alegorias', nome: 'Alegorias', tipo: 'texto' },
+      // Rotulo renomeado; a coluna continua `alegorias` para nao migrar dados.
+      { coluna: 'alegorias', nome: 'Palavras', tipo: 'texto' },
       { coluna: 'simbolos', nome: 'Símbolos', tipo: 'texto' },
       { coluna: 'idade', nome: 'Idade', tipo: 'numero' },
-      { coluna: 'passos', nome: 'Passos', tipo: 'texto' },
+      // Idem: a coluna segue `passos`. Nao confundir com resumos.livro_da_lei,
+      // que e outra coluna, em outro formulario, com o mesmo rotulo.
+      { coluna: 'passos', nome: 'Livro da Lei', tipo: 'texto' },
       { coluna: 'marcha', nome: 'Marcha', tipo: 'texto' },
       { coluna: 'toques', nome: 'Toques', tipo: 'texto' },
       { coluna: 'outro', nome: 'Outro', tipo: 'texto' },
