@@ -1,5 +1,5 @@
 import type { ElementType } from 'react'
-import { LayoutDashboard, ClipboardList, SlidersHorizontal } from 'lucide-react'
+import { LayoutDashboard, ClipboardList, SlidersHorizontal, Sparkles } from 'lucide-react'
 import type { Modulo } from './secoes'
 
 export type TipoCampo = 'texto' | 'texto_longo' | 'numero' | 'ano' | 'data' | 'lista' | 'formulario'
@@ -124,6 +124,13 @@ export const GRUPOS_GERAL: GrupoGeral[] = [
     // Ficha do Grau saiu daqui: agora vive dentro de Simbolica e de Superiores
     // (lib/secoes.ts), cada uma com sua faixa de graus.
     modulos: [{ nome: 'Visão Geral', href: '/geral/dashboards' }],
+  },
+  {
+    titulo: 'Assistente',
+    icon: Sparkles,
+    // Le os formularios e parametros abaixo pelo client de sessao, entao nao
+    // enxerga nada alem do que a propria pessoa veria nas telas.
+    modulos: [{ nome: 'Perguntar', href: '/geral/assistente' }],
   },
   {
     titulo: 'Formulários',

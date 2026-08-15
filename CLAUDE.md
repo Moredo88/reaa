@@ -20,6 +20,9 @@ convivem na mesma tela inicial, em dois blocos.
 - **`createAdminClient()` (service role) ignora RLS.** Só pode ser importado por código que
   roda no servidor — rotas `/api/admin`, depois de `exigirAdmin()`. Nunca de um `'use client'`.
 - **O papel vem do banco**, nunca do corpo da requisição.
+- **O assistente de IA lê pelo client de sessão** (`/api/geral/assistente`), nunca pela service
+  role. Ele só enxerga o que a própria pessoa veria na tela, e a lista de tabelas que ele pode
+  consultar sai de `lib/geral.ts` — o modelo escolhe entre opções, não escreve query.
 - `NEXT_PUBLIC_*` são embutidas no bundle do navegador durante o build. Nenhum segredo
   pode usar esse prefixo.
 

@@ -67,15 +67,19 @@ quando o secret existe.
 
 ### Variáveis no Coolify
 
-O `SUPABASE_SERVICE_ROLE_KEY` **não** vai para os secrets do GitHub: ele só é usado no servidor,
-em runtime, pelas rotas `/api/admin`. Cadastre no painel do Coolify, nas variáveis de ambiente
-do recurso:
+O `SUPABASE_SERVICE_ROLE_KEY` e o `ANTHROPIC_API_KEY` **não** vão para os secrets do GitHub:
+os dois só são usados no servidor, em runtime. Cadastre no painel do Coolify, nas variáveis de
+ambiente do recurso:
 
 | Variável | Onde é usada |
 | --- | --- |
 | `NEXT_PUBLIC_SUPABASE_URL` | runtime (server e client) |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | runtime (server e client) |
 | `SUPABASE_SERVICE_ROLE_KEY` | runtime, só no servidor — ignora RLS |
+| `ANTHROPIC_API_KEY` | runtime, só no servidor — rota `/api/geral/assistente` |
+
+Sem o `ANTHROPIC_API_KEY` o deploy sobe normalmente: só a tela do Assistente responde
+com aviso de "não configurado". As outras três são obrigatórias.
 
 ### Onde achar os valores do Coolify
 
