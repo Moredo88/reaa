@@ -56,6 +56,8 @@ export const FORMULARIOS: Formulario[] = [
     nome: 'Notes',
     campos: [
       { coluna: 'titulo', nome: 'Título', tipo: 'texto', obrigatorio: true },
+      { coluna: 'grau_id', nome: 'Grau', tipo: 'lista', refTabela: 'graus' },
+      { coluna: 'corpo_id', nome: 'Corpo', tipo: 'lista', refTabela: 'corpos' },
       { coluna: 'texto', nome: 'Texto', tipo: 'texto_longo' },
     ],
   },

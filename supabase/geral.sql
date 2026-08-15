@@ -57,9 +57,18 @@ alter table public.obreiros
 create table if not exists public.notes (
   id         uuid primary key default gen_random_uuid(),
   titulo     text not null,
+  grau_id    uuid references public.graus(id) on delete set null,
+  corpo_id   uuid references public.corpos(id) on delete set null,
   texto      text,
   created_at timestamptz not null default now()
 );
+
+-- Mesmo caso de obreiros.corpo_id: quem ja tinha a tabela criada recebe as
+-- colunas por aqui.
+alter table public.notes
+  add column if not exists grau_id uuid references public.graus(id) on delete set null;
+alter table public.notes
+  add column if not exists corpo_id uuid references public.corpos(id) on delete set null;
 
 create table if not exists public.eventos (
   id         uuid primary key default gen_random_uuid(),
