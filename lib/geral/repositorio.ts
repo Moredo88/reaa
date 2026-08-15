@@ -1,5 +1,7 @@
 import type { SupabaseServerClient } from '@/lib/supabase/server'
 import type { Formulario } from '@/lib/geral'
+import { paraTextoPuro } from '@/lib/utils'
+import { sanitizarHtml } from './sanitizar'
 
 export interface OpcaoRef {
   id: string
@@ -15,7 +17,9 @@ export async function listarOpcoes(
 ): Promise<OpcaoRef[]> {
   const { data, error } = await supabase.from(tabela).select('id, nome').order('nome')
   if (error) throw new Error(error.message)
-  return data ?? []
+  // `nome` de um formulario (obreiros) pode ter formatacao; como rotulo de
+  // <option> ele tem que ser texto puro, senao a marcacao aparece crua.
+  return (data ?? []).map((o) => ({ ...o, nome: paraTextoPuro(o.nome ?? '') }))
 }
 
 export async function listarParametro(
@@ -45,7 +49,26 @@ export async function listarFormulario(
     .select(select)
     .order('created_at', { ascending: false })
   if (error) throw new Error(error.message)
-  return (data as unknown as Record<string, unknown>[] | null) ?? []
+
+  const registros = (data as unknown as Record<string, unknown>[] | null) ?? []
+
+  // Ponto unico de leitura dos formularios: sanitizar aqui cobre de uma vez o
+  // editor, a tabela e a Ficha do Grau. A escrita ja sanitiza (montarPayload);
+  // isto e a segunda camada, para o caso de um valor ter entrado no banco por
+  // fora da API -- permissao so na tela e permissao nenhuma.
+  const colunasTexto = formulario.campos
+    .filter((c) => c.tipo === 'texto' || c.tipo === 'texto_longo')
+    .map((c) => c.coluna)
+
+  return registros.map((registro) => {
+    const limpo = { ...registro }
+    for (const coluna of colunasTexto) {
+      if (typeof limpo[coluna] === 'string') {
+        limpo[coluna] = sanitizarHtml(limpo[coluna] as string)
+      }
+    }
+    return limpo
+  })
 }
 
 // Converte o corpo do formulario (strings vindas do form HTML) para os tipos
@@ -74,6 +97,16 @@ export function montarPayload(
       case 'ano':
         payload[campo.coluna] = Number.isFinite(Number(valor)) ? Number(valor) : null
         break
+      case 'texto':
+      case 'texto_longo': {
+        // Ponto unico de escrita dos dois verbos (POST e PATCH passam por aqui),
+        // entao e onde a sanitizacao tem que estar.
+        const limpo = sanitizarHtml(String(valor))
+        // Editor vazio ainda devolve marcacao ("<div><br></div>"): sem isto o
+        // campo contaria como preenchido na Ficha do Grau.
+        payload[campo.coluna] = paraTextoPuro(limpo) === '' ? null : limpo
+        break
+      }
       default:
         payload[campo.coluna] = valor
     }

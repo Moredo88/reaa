@@ -5,10 +5,10 @@ import { useRouter } from 'next/navigation'
 import { Plus, Trash2, X } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
-import Textarea from '@/components/ui/Textarea'
 import Select from '@/components/ui/Select'
+import EditorTexto from '@/components/ui/EditorTexto'
 import DataTable from './DataTable'
-import { formatDate } from '@/lib/utils'
+import { formatDate, paraTextoPuro } from '@/lib/utils'
 import type { Formulario } from '@/lib/geral'
 import type { OpcaoRef } from '@/lib/geral/repositorio'
 
@@ -36,12 +36,20 @@ function valorExibicao(formulario: Formulario, registro: Record<string, unknown>
 
   if (campo.tipo === 'lista' || campo.tipo === 'formulario') {
     const ref = registro[campo.refTabela as string] as { nome: string } | null
-    return ref?.nome ?? '—'
+    return ref?.nome ? paraTextoPuro(ref.nome) : '—'
   }
 
   const valor = registro[coluna]
   if (valor === null || valor === undefined || valor === '') return '—'
   if (campo.tipo === 'data') return formatDate(String(valor))
+
+  // Campo de texto guarda HTML. A tabela recebe texto puro porque este mesmo
+  // valor alimenta a ordenacao e a lista de filtros do DataTable -- com
+  // marcacao, o filtro listaria "<b>foo</b>" e a ordem seguiria a tag.
+  if (campo.tipo === 'texto' || campo.tipo === 'texto_longo') {
+    return paraTextoPuro(String(valor)) || '—'
+  }
+
   return String(valor)
 }
 
@@ -132,7 +140,13 @@ export default function FormularioClient({ formulario, registros, opcoes, podeEd
       )}
 
       {form && (
-        <form onSubmit={salvar} className="space-y-4 rounded-xl border border-slate-200 bg-white p-6">
+        // `key` por registro: o EditorTexto le o valor inicial so na montagem,
+        // entao trocar de registro em edicao precisa remontar o formulario.
+        <form
+          key={form.id ?? 'novo'}
+          onSubmit={salvar}
+          className="space-y-4 rounded-xl border border-slate-200 bg-white p-6"
+        >
           <h2 className="text-sm font-semibold text-slate-900">
             {form.id === null ? `Novo registro em ${formulario.nome}` : 'Editando registro'}
           </h2>
@@ -143,17 +157,21 @@ export default function FormularioClient({ formulario, registros, opcoes, podeEd
               const atualizar = (v: string) =>
                 setForm({ ...form, valores: { ...form.valores, [campo.coluna]: v } })
 
-              if (campo.tipo === 'texto_longo') {
-                return (
-                  <div key={campo.coluna} className="sm:col-span-2">
-                    <Textarea
-                      id={campo.coluna}
-                      label={campo.nome}
-                      value={valor}
-                      onChange={(e) => atualizar(e.target.value)}
-                      required={campo.obrigatorio}
-                    />
-                  </div>
+              if (campo.tipo === 'texto' || campo.tipo === 'texto_longo') {
+                const editor = (
+                  <EditorTexto
+                    id={campo.coluna}
+                    label={campo.nome}
+                    valorInicial={valor}
+                    onChange={atualizar}
+                    multilinha={campo.tipo === 'texto_longo'}
+                  />
+                )
+
+                return campo.tipo === 'texto_longo' ? (
+                  <div key={campo.coluna} className="sm:col-span-2">{editor}</div>
+                ) : (
+                  <div key={campo.coluna}>{editor}</div>
                 )
               }
 

@@ -6,6 +6,7 @@ import {
   FileText, Layers, MousePointerClick, FileQuestion,
 } from 'lucide-react'
 import Select from '@/components/ui/Select'
+import { paraTextoPuro } from '@/lib/utils'
 import type { CampoFormulario, Formulario } from '@/lib/geral'
 import type { OpcaoRef } from '@/lib/geral/repositorio'
 
@@ -81,10 +82,13 @@ const ICONES: Record<string, ElementType> = {
   contexto_historico: Landmark,
 }
 
-function textoDe(valor: unknown): string | null {
+// Devolve o valor bruto (HTML, ver lib/geral/sanitizar.ts) quando ele tem
+// conteudo visivel, e null quando esta vazio -- "<div><br></div>" de editor
+// vazio nao pode contar como campo preenchido.
+function conteudoDe(valor: unknown): string | null {
   if (valor === null || valor === undefined) return null
-  const texto = String(valor).trim()
-  return texto === '' ? null : texto
+  const bruto = String(valor)
+  return paraTextoPuro(bruto) === '' ? null : bruto
 }
 
 export default function FichaGrauClient({ formulario, graus, resumos }: Props) {
@@ -94,7 +98,7 @@ export default function FichaGrauClient({ formulario, graus, resumos }: Props) {
   const resumo = grauId ? resumos.find((r) => String(r.grau_id ?? '') === grauId) : undefined
   const campos = formulario.campos.filter((c) => !CAMPOS_OCULTOS.includes(c.coluna))
 
-  const preenchidos = resumo ? campos.filter((c) => textoDe(resumo[c.coluna])).length : 0
+  const preenchidos = resumo ? campos.filter((c) => conteudoDe(resumo[c.coluna])).length : 0
   const porcento = campos.length === 0 ? 0 : Math.round((preenchidos / campos.length) * 100)
 
   const classificados = new Set(GRUPOS.flatMap((g) => g.colunas))
@@ -180,7 +184,7 @@ export default function FichaGrauClient({ formulario, graus, resumos }: Props) {
             </div>
           ) : (
             secoes.map(({ grupo, campos: camposGrupo }) => {
-              const cheios = camposGrupo.filter((c) => textoDe(resumo[c.coluna])).length
+              const cheios = camposGrupo.filter((c) => conteudoDe(resumo[c.coluna])).length
 
               return (
                 <section key={grupo.nome}>
@@ -198,7 +202,7 @@ export default function FichaGrauClient({ formulario, graus, resumos }: Props) {
                   <div className="mt-3 grid gap-3 sm:grid-cols-2">
                     {camposGrupo.map((campo) => {
                       const Icone = ICONES[campo.coluna] ?? FileText
-                      const texto = textoDe(resumo[campo.coluna])
+                      const texto = conteudoDe(resumo[campo.coluna])
                       const longo = campo.tipo === 'texto_longo'
 
                       return (
@@ -216,13 +220,25 @@ export default function FichaGrauClient({ formulario, graus, resumos }: Props) {
                               {campo.nome}
                             </h4>
                           </div>
-                          <p
-                            className={`mt-3 whitespace-pre-wrap text-sm leading-relaxed ${
-                              texto ? 'text-slate-900' : 'text-slate-400'
-                            }`}
-                          >
-                            {texto ?? 'Não informado'}
-                          </p>
+                          {texto === null ? (
+                            <p className="mt-3 text-sm leading-relaxed text-slate-400">
+                              Não informado
+                            </p>
+                          ) : /<[a-z]/i.test(texto) ? (
+                            // Ja sanitizado no servidor, em listarFormulario.
+                            // As variantes b/i/u sao explicitas para o estilo
+                            // nao depender do preflight do Tailwind.
+                            <div
+                              className="mt-3 text-sm leading-relaxed text-slate-900 [&_b]:font-semibold [&_strong]:font-semibold [&_i]:italic [&_em]:italic [&_u]:underline"
+                              dangerouslySetInnerHTML={{ __html: texto }}
+                            />
+                          ) : (
+                            // Registro antigo, gravado antes do editor: texto
+                            // puro, entao as quebras de linha ainda importam.
+                            <p className="mt-3 whitespace-pre-wrap text-sm leading-relaxed text-slate-900">
+                              {texto}
+                            </p>
+                          )}
                         </article>
                       )
                     })}
