@@ -121,10 +121,9 @@ export const GRUPOS_GERAL: GrupoGeral[] = [
   {
     titulo: 'Dashboards',
     icon: LayoutDashboard,
-    modulos: [
-      { nome: 'Visão Geral', href: '/geral/dashboards' },
-      { nome: 'Ficha do Grau', href: '/geral/dashboards/ficha-grau' },
-    ],
+    // Ficha do Grau saiu daqui: agora vive dentro de Simbolica e de Superiores
+    // (lib/secoes.ts), cada uma com sua faixa de graus.
+    modulos: [{ nome: 'Visão Geral', href: '/geral/dashboards' }],
   },
   {
     titulo: 'Formulários',

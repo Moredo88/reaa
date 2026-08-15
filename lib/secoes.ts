@@ -38,7 +38,13 @@ export const SECOES: Secao[] = [
       titulo: 'text-blue-900',
       hover: 'hover:border-blue-400 hover:bg-blue-50/60',
     },
-    modulos: [],
+    modulos: [
+      {
+        nome: 'Ficha do Grau',
+        href: '/simbolica/ficha-grau',
+        descricao: 'Resumo executivo dos graus 1 a 3',
+      },
+    ],
   },
   {
     area: 'superiores',
@@ -51,6 +57,12 @@ export const SECOES: Secao[] = [
       titulo: 'text-red-900',
       hover: 'hover:border-red-400 hover:bg-red-50/60',
     },
-    modulos: [],
+    modulos: [
+      {
+        nome: 'Ficha do Grau',
+        href: '/superiores/ficha-grau',
+        descricao: 'Resumo executivo dos graus 4 a 33',
+      },
+    ],
   },
 ]

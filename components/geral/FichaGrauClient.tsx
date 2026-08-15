@@ -14,6 +14,8 @@ interface Props {
   formulario: Formulario
   graus: OpcaoRef[]
   resumos: Record<string, unknown>[]
+  /** Area e faixa de graus desta ficha, ex.: "Simbólica — graus 1 a 3". */
+  contexto?: string
 }
 
 // Grau ja aparece no cabecalho da ficha; o resto dos campos do Resumo entra
@@ -91,7 +93,7 @@ function conteudoDe(valor: unknown): string | null {
   return paraTextoPuro(bruto) === '' ? null : bruto
 }
 
-export default function FichaGrauClient({ formulario, graus, resumos }: Props) {
+export default function FichaGrauClient({ formulario, graus, resumos, contexto }: Props) {
   const [grauId, setGrauId] = useState('')
 
   const grauNome = graus.find((g) => g.id === grauId)?.nome
@@ -119,6 +121,7 @@ export default function FichaGrauClient({ formulario, graus, resumos }: Props) {
         <p className="mt-1 text-sm text-slate-500">
           Selecione um grau para ver a visão executiva do resumo cadastrado.
         </p>
+        {contexto && <p className="mt-0.5 text-xs text-slate-400">{contexto}</p>}
       </div>
 
       <div className="max-w-sm rounded-xl border border-slate-200 bg-white p-4">
