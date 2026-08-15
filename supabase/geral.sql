@@ -85,6 +85,7 @@ create table if not exists public.cobridores (
 
 create table if not exists public.resumos (
   id                 uuid primary key default gen_random_uuid(),
+  grau_id            uuid references public.graus(id) on delete set null,
   alegorias          text,
   simbolos           text,
   juramento          text,
@@ -93,6 +94,11 @@ create table if not exists public.resumos (
   contexto_historico text,
   created_at         timestamptz not null default now()
 );
+
+-- "create table if not exists" nao altera tabela ja criada: para quem rodou
+-- este arquivo antes de grau_id existir, a coluna entra por aqui.
+alter table public.resumos
+  add column if not exists grau_id uuid references public.graus(id) on delete set null;
 
 -- ------------------------------------------------------------
 -- RLS: qualquer pessoa logada le; so admin cria, edita ou exclui.

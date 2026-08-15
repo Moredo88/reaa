@@ -90,6 +90,7 @@ export const FORMULARIOS: Formulario[] = [
     tabela: 'resumos',
     nome: 'Resumo',
     campos: [
+      { coluna: 'grau_id', nome: 'Grau', tipo: 'lista', refTabela: 'graus' },
       { coluna: 'alegorias', nome: 'Alegorias', tipo: 'texto' },
       { coluna: 'simbolos', nome: 'Símbolos', tipo: 'texto' },
       { coluna: 'juramento', nome: 'Juramento', tipo: 'texto' },
